@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "MilkV-Duo",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "${env:CC}",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}

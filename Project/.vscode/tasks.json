@@ -1,0 +1,143 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "debug build",
+            "type": "shell",
+            "command": "${env:CC}",
+            "args": [
+                "-g",
+                "${workspaceFolder}/src/main.cpp",
+                "-o",
+                "${workspaceFolder}/${workspaceFolderBasename}.elf",
+                "-mcpu=c906fdv",
+                "-march=rv64imafdcv0p7xthead",
+                "-mcmodel=medany",
+                "-mabi=lp64d",
+                "-I/home/usr/work/duo-sdk/rootfs/usr/include",
+                "-D_LARGEFILE_SOURCE",
+                "-D_LARGEFILE64_SOURCE",
+                "-D_FILE_OFFSET_BITS=64",
+                "-L/home/usr/work/duo-sdk/rootfs/lib",
+                "-L/home/usr/work/duo-sdk/rootfs/usr/lib",
+                "-lstdc++"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "コンパイラ: /work/duo-sdk/riscv64-linux-musl-x86_64/bin/riscv64-unknown-linux-musl-gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "release build",
+            "type": "shell",
+            "command": "${env:CC}",
+            "args": [
+                "${workspaceFolder}/src/main.cpp",
+                "-o",
+                "${workspaceFolder}/${workspaceFolderBasename}.elf",
+                "-mcpu=c906fdv",
+                "-march=rv64imafdcv0p7xthead",
+                "-mcmodel=medany",
+                "-mabi=lp64d",
+                "-I/home/usr/work/duo-sdk/rootfs/usr/include",
+                "-D_LARGEFILE_SOURCE",
+                "-D_LARGEFILE64_SOURCE",
+                "-D_FILE_OFFSET_BITS=64",
+                "-L/home/usr/work/duo-sdk/rootfs/lib",
+                "-L/home/usr/work/duo-sdk/rootfs/usr/lib",
+                "-lstdc++"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "コンパイラ: /work/duo-sdk/riscv64-linux-musl-x86_64/bin/riscv64-unknown-linux-musl-gcc",
+            "group": {
+                "kind": "build",
+             }
+        },
+        {
+            "type": "shell",
+            "label": "scp",
+            "command": "scp",
+            "args": [
+                "${workspaceFolderBasename}.elf",
+                "${env:REMOTE_USER}@${env:REMOTE_HOST}:${env:PROJECT_DIR}/${workspaceFolderBasename}.elf"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "none",
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "gdbserver",
+            "command": "ssh",
+            "args": [
+                "-oStrictHostKeyChecking=no",
+                "${env:REMOTE_USER}@${env:REMOTE_HOST}",
+                "\"",
+                "cd",
+                "${env:PROJECT_DIR}",
+                "&&",
+                "gdbserver",
+                "localhost:50000",
+                "${workspaceFolderBasename}.elf",
+                "\""
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": ".",
+                        "file": 1,
+                        "location": 2,
+                        "message": 3
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Process*",
+                    "endsPattern": "^.*Listening*"
+                }
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "type": "shell",
+            "label": "start debug",
+            "dependsOn": [
+                "debug build",
+                "scp",
+                "gdbserver"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "type": "shell",
+            "label": "release",
+            "dependsOn": [
+                "release build",
+                "scp",
+                "gdbserver"
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}
